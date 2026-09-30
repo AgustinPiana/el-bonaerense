@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Bonaerense</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 100 120' xmlns='http://www.w3.org/2000/svg'><path d='M50 5 L95 20 L95 70 Q95 105 50 118 Q5 105 5 70 L5 20 Z' fill='%23c9a84c'/><path d='M50 10 L89 23 L89 70 Q89 100 50 112 Q11 100 11 70 L11 23 Z' fill='%230d3b6e'/></svg>">
+
+<!-- SEO y Open Graph -->
+<meta name="description" content="Adiviná el municipio bonaerense del día. 5 intentos, 3 minutos. ¿Cuánto sabés de la provincia de Buenos Aires?">
+<meta property="og:title" content="El Bonaerense — Adiviná el municipio del día">
+<meta property="og:description" content="Adiviná el municipio bonaerense del día. 5 intentos, 3 minutos. ¿Cuánto sabés de la provincia?">
+<meta property="og:image" content="https://elbonaerense.online/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://elbonaerense.online">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://elbonaerense.online/og.jpg">
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GGV2W7F8G7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-GGV2W7F8G7');
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;family=Montserrat:wght@300;400;600;800&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --blue-deep: #0a1628;
+    --blue-mid: #0d3b6e;
+    --blue-bright: #1565c0;
+    --blue-glow: #2196f3;
+    --blue-light: #64b5f6;
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --white: #e8edf5;
+    --grey: #8899aa;
+    --red: #e53935;
+    --green: #43a047;
+    --orange: #fb8c00;
+    --radius: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  #canvas-bg {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0; opacity: 0.35;
+  }
+
+  .wrapper {
+    position: relative; z-index: 1;
+    max-width: 760px; margin: 0 auto;
+    padding: 0 20px 0;
+  }
+
+  header {
+    display: flex; flex-direction: column;
+    align-items: center; padding: 36px 0 24px; gap: 12px;
+  }
+
+  .logo-wrap {
+    position: relative; width: 100px; height: 100px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-ring {
+    position: absolute; border-radius: 50%;
+    border: 2px solid var(--blue-glow);
+    animation: spin 8s linear infinite;
+  }
+  .logo-ring:nth-child(1) { width:100%; height:100%; opacity:0.5; }
+  .logo-ring:nth-child(2) { width:82%; height:82%; opacity:0.3; animation-direction:reverse; animation-duration:5s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .escudo-svg {
+    width: 72px; height: 72px;
+    filter: drop-shadow(0 0 12px rgba(33,150,243,0.6));
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%,100% { filter: drop-shadow(0 0 10px rgba(33,150,243,0.5)); }
+    50%      { filter: drop-shadow(0 0 22px rgba(33,150,243,0.9)); }
+  }
+
+  .game-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 5.5rem);
+    letter-spacing: 0.12em; line-height: 1;
+    color: var(--white);
+    text-shadow: 0 0 40px rgba(33,150,243,0.4), 0 2px 0 rgba(0,0,0,0.8);
+    text-align: center;
+  }
+  .game-subtitle {
+    font-size: 0.72rem; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--blue-light); text-align: center;
+  }
+  .date-badge {
+    font-size: 0.65rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--grey);
+    border: 1px solid #1e3a5f; padding: 4px 14px;
+    border-radius: 20px; margin-top: 4px;
+  }
+
+  .nav-tabs { display: flex; gap: 4px; justify-content: center; margin-bottom: 30px; }
+  .nav-btn {
+    background: transparent; border: 1px solid #1e3a5f;
+    color: var(--grey); font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 7px 18px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+  }
+  .nav-btn.active, .nav-btn:hover {
+    border-color: var(--blue-glow); color: var(--blue-light);
+    background: rgba(33,150,243,0.08);
+  }
+
+  .panel { display: none; animation: fadeIn 0.4s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+  /* ── REVELAR ── */
+  .reveal-screen {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 20px 50px; gap: 20px; text-align: center;
+  }
+  .reveal-screen p {
+    color: var(--grey); font-size: 0.78rem;
+    line-height: 1.8; letter-spacing: 0.05em; max-width: 420px;
+  }
+  .reveal-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem; letter-spacing: 0.2em;
+    background: transparent; border: 2px solid var(--blue-glow);
+    color: var(--blue-light); padding: 14px 48px; border-radius: 4px;
+    cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+  }
+  .reveal-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(33,150,243,0.08);
+    transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+  }
+  .reveal-btn:hover { border-color: var(--white); color: var(--white); }
+  .reveal-btn:hover::before { transform: scaleX(1); }
+  .reveal-btn:active { transform: scale(0.97); }
+
+  /* ── TIMER ── */
+  .game-timer { text-align: center; margin-bottom: 18px; }
+  .timer-label { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--grey); margin-bottom: 4px; }
+  .game-timer-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem; letter-spacing: 0.15em;
+    color: var(--blue-light); transition: color 0.5s;
+  }
+  .game-timer-display.warning { color: var(--gold-light); }
+  .game-timer-display.danger  { color: var(--red); animation: pulse-red 0.8s infinite; }
+  @keyframes pulse-red { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  .attempt-counter { text-align: center; margin-bottom: 24px; }
+  .attempt-dots { display:flex; gap:10px; justify-content:center; margin-top:8px; }
+  .dot {
+    width:14px; height:14px; border-radius:50%;
+    border:2px solid var(--blue-mid); background:transparent; transition:all 0.3s;
+  }
+  .dot.wrong  { background:var(--red);    border-color:var(--red); }
+  .dot.right  { background:var(--green);  border-color:var(--green); }
+  .dot.skipped{ background:var(--orange); border-color:var(--orange); }
+
+  .label-sm { font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--grey); margin-bottom:6px; }
+
+  /* ── LETRAS ── */
+  .letters-display {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin: 28px 0 20px;
+  }
+  .letter-box {
+    width: 38px; height: 48px;
+    border-bottom: 2px solid var(--blue-bright);
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 6px; font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem; color: var(--white); transition: all 0.4s;
+  }
+  .letter-box.space { border-bottom-color: transparent; width: 20px; }
+  .letter-box.hint-revealed { border-bottom-color: var(--blue-glow); color: var(--blue-light); animation: letterPop 0.5s ease; }
+  .letter-box.win-revealed  { border-bottom-color: var(--green); color: #a5d6a7; animation: letterPop 0.4s ease; }
+  .letter-box.lose-revealed { border-bottom-color: var(--gold); color: var(--gold-light); animation: letterPop 0.4s ease; }
+  @keyframes letterPop {
+    0% { transform: translateY(-12px); opacity:0; }
+    60% { transform: translateY(3px); }
+    100% { transform: none; opacity:1; }
+  }
+
+  /* ── PISTAS ── */
+  .hints-area {
+    background: rgba(10,22,40,0.7); border: 1px solid #1e3a5f;
+    border-radius: var(--radius); padding: 18px 20px; margin-bottom: 24px;
+  }
+  .hint-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid #12243a;
+    opacity: 0.2; transition: opacity 0.6s; font-size: 0.82rem;
+  }
+  .hint-item:last-child { border-bottom: none; }
+  .hint-item.visible { opacity: 1; }
+  .hint-item.just-unlocked { animation: hintSlide 0.5s ease; }
+  @keyframes hintSlide { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:none; } }
+  .hint-icon {
+    width:30px; height:30px; border-radius:50%; background:var(--blue-mid);
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.8rem; flex-shrink:0; color:var(--blue-light); font-weight:700;
+  }
+  .hint-label { color:var(--grey); font-size:0.62rem; letter-spacing:0.15em; text-transform:uppercase; }
+  .hint-value { color:var(--white); font-weight:700; margin-top:2px; }
+
+  /* ── AUTOCOMPLETE ── */
+  .autocomplete-wrap { position: relative; flex: 1; }
+  .guess-input {
+    width: 100%; background: #0a1628; border: 1px solid var(--blue-mid);
+    color: var(--white); font-family: 'Space Mono', monospace;
+    font-size: 0.78rem; padding: 12px 14px;
+    border-radius: var(--radius); outline: none; transition: border-color 0.2s;
+  }
+  .guess-input:focus { border-color: var(--blue-glow); }
+  .guess-input::placeholder { color: var(--grey); }
+  .autocomplete-list {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: #0d1e35; border: 1px solid var(--blue-mid);
+    border-radius: var(--radius); z-index: 100;
+    display: none;
+  }
+  .autocomplete-list.open { display: block; }
+  .autocomplete-item {
+    padding: 10px 14px; font-size: 0.78rem; cursor: pointer;
+    border-bottom: 1px solid #0d2540; transition: background 0.15s; color: var(--white);
+  }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover, .autocomplete-item.active {
+    background: rgba(33,150,243,0.15); color: var(--blue-light);
+  }
+  .autocomplete-item mark { background: transparent; color: var(--blue-glow); font-weight: 700; }
+
+  /* ── BOTONES DE ACCIÓN ── */
+  .guess-area { display:flex; gap:10px; margin-bottom:10px; }
+  .guess-btn {
+    background: var(--blue-bright); border: none; color: white;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
+    letter-spacing: 0.1em; padding: 0 22px; border-radius: var(--radius);
+    cursor: pointer; transition: background 0.2s, transform 0.1s; white-space: nowrap;
+  }
+  .guess-btn:hover { background: var(--blue-glow); }
+  .guess-btn:active { transform: scale(0.97); }
+  .guess-btn:disabled { background: #1e3a5f; color: var(--grey); cursor: default; }
+
+  /* Botón PASO */
+  .skip-btn {
+    background: transparent;
+    border: 1px solid var(--orange);
+    color: var(--orange);
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
+    letter-spacing: 0.1em; padding: 0 18px; border-radius: var(--radius);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .skip-btn:hover { background: rgba(251,140,0,0.12); }
+  .skip-btn:active { transform: scale(0.97); }
+  .skip-btn:disabled { border-color: #3a3020; color: #3a3020; cursor: default; }
+
+  .feedback-msg {
+    text-align:center; font-size:0.78rem; letter-spacing:0.08em;
+    min-height:24px; margin-bottom:10px; font-weight:700;
+  }
+  .feedback-msg.wrong  { color:var(--red);    animation:shake 0.4s; }
+  .feedback-msg.right  { color:var(--green); }
+  .feedback-msg.skipped{ color:var(--orange); }
+  @keyframes shake { 0%,100% { transform:none; } 25% { transform:translateX(-8px); } 75% { transform:translateX(8px); } }
+
+  /* ── RESULTADO ── */
+  .result-overlay {
+    display:none; flex-direction:column; align-items:center;
+    text-align:center; padding:30px 20px;
+    background:rgba(8,12,20,0.97); border:1px solid var(--blue-mid);
+    border-radius:10px; margin-top:10px; animation:fadeIn 0.5s ease;
+  }
+  .result-overlay.show { display:flex; }
+  .result-emoji { font-size:3rem; margin-bottom:12px; }
+  .result-title { font-family:'Bebas Neue', sans-serif; font-size:2.4rem; letter-spacing:0.1em; margin-bottom:8px; }
+  .result-title.win  { color:var(--green); }
+  .result-title.lose { color:var(--red); }
+  .result-answer { font-family:'Bebas Neue', sans-serif; font-size:1.8rem; color:var(--gold-light); letter-spacing:0.15em; margin:10px 0 20px; }
+  .result-sub { color:var(--grey); font-size:0.75rem; letter-spacing:0.1em; margin-bottom:6px; }
+  .share-btn {
+    background:transparent; border:1px solid var(--blue-glow);
+    color:var(--blue-light); font-family:'Space Mono', monospace;
+    font-size:0.72rem; letter-spacing:0.15em; text-transform:uppercase;
+    padding:10px 22px; border-radius:20px; cursor:pointer; transition:all 0.2s; margin-bottom:16px;
+  }
+  .share-btn:hover { background:rgba(33,150,243,0.12); }
+  .countdown-wrap { text-align:center; color:var(--grey); font-size:0.68rem; letter-spacing:0.15em; }
+  #countdown-timer { font-family:'Bebas Neue', sans-serif; font-size:1.6rem; color:var(--blue-light); letter-spacing:0.2em; display:block; margin-top:4px; }
+
+  /* ── STATS ── */
+  .stats-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:20px 0 14px; }
+  .stat-card { background:rgba(10,22,40,0.8); border:1px solid #1e3a5f; border-radius:8px; padding:18px 10px; text-align:center; }
+  .stat-num { font-family:'Bebas Neue', sans-serif; font-size:2.4rem; line-height:1; color:var(--blue-light); display:block; }
+  .stat-num.gold { color:var(--gold-light); }
+  .stat-label { font-size:0.52rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--grey); margin-top:6px; display:block; }
+  .streak-bar { background:rgba(10,22,40,0.8); border:1px solid #1e3a5f; border-radius:8px; padding:18px 20px; margin-bottom:14px; }
+  .streak-title { font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--grey); margin-bottom:14px; }
+  .bar-row { display:flex; align-items:center; gap:10px; margin-bottom:7px; font-size:0.68rem; }
+  .bar-label { color:var(--grey); width:88px; flex-shrink:0; font-size:0.6rem; }
+  .bar-track { flex:1; height:10px; background:#0d1e30; border-radius:5px; overflow:hidden; }
+  .bar-fill  { height:100%; background:var(--blue-bright); border-radius:5px; transition:width 1s ease; }
+  .bar-val   { color:var(--white); width:24px; text-align:right; font-size:0.68rem; }
+
+  /* ── CÓMO JUGAR ── */
+  .how-card { background:rgba(10,22,40,0.8); border:1px solid #1e3a5f; border-radius:8px; padding:22px 24px; margin-bottom:14px; }
+  .how-step { display:flex; gap:14px; margin-bottom:16px; align-items:flex-start; font-size:0.8rem; line-height:1.6; color:var(--grey); }
+  .how-step:last-child { margin-bottom:0; }
+  .step-num { width:26px; height:26px; border-radius:50%; background:var(--blue-bright); color:white; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue', sans-serif; font-size:1rem; flex-shrink:0; margin-top:1px; }
+  .how-step b { color:var(--white); }
+
+  /* ── FOOTER ── */
+  .site-footer { position:relative; z-index:1; text-align:center; padding:28px 20px 36px; margin-top:40px; border-top:1px solid #0f2240; }
+  .site-footer p { font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--grey); }
+  .site-footer a { color:var(--blue-light); text-decoration:none; transition:color 0.2s; }
+  .site-footer a:hover { color:var(--white); }
+
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--blue-mid); border-radius:3px; }
+
+  @media (max-width:520px) {
+    .letter-box { width:30px; height:40px; font-size:1.3rem; }
+    .stats-grid-4 { grid-template-columns:repeat(2,1fr); }
+    .guess-area { flex-direction:column; }
+    .guess-btn, .skip-btn { padding:12px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas-bg"></canvas>
+
+<div class="wrapper">
+  <header>
+    <div class="logo-wrap">
+      <div class="logo-ring"></div>
+      <div class="logo-ring"></div>
+      <svg class="escudo-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0d3b6e"/><stop offset="100%" stop-color="#051020"/>
+          </linearGradient>
+          <linearGradient id="gold1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f0d080"/><stop offset="100%" stop-color="#a07830"/>
+          </linearGradient>
+        </defs>
+        <path d="M50 5 L95 20 L95 70 Q95 105 50 118 Q5 105 5 70 L5 20 Z" fill="url(#gold1)"/>
+        <path d="M50 10 L89 23 L89 70 Q89 100 50 112 Q11 100 11 70 L11 23 Z" fill="url(#bg1)"/>
+        <circle cx="50" cy="52" r="14" fill="none" stroke="#f0d080" stroke-width="2"/>
+        <circle cx="50" cy="52" r="9" fill="#f0d080" opacity="0.9"/>
+        <g stroke="#f0d080" stroke-width="1.5">
+          <line x1="50" y1="32" x2="50" y2="37"/><line x1="50" y1="67" x2="50" y2="72"/>
+          <line x1="30" y1="52" x2="35" y2="52"/><line x1="65" y1="52" x2="70" y2="52"/>
+          <line x1="35.86" y1="37.86" x2="39.4" y2="41.4"/><line x1="60.6" y1="62.6" x2="64.14" y2="66.14"/>
+          <line x1="64.14" y1="37.86" x2="60.6" y2="41.4"/><line x1="39.4" y1="62.6" x2="35.86" y2="66.14"/>
+        </g>
+        <ellipse cx="50" cy="28" rx="5" ry="4" fill="#e53935" opacity="0.85"/>
+        <rect x="47" y="24" width="6" height="7" rx="1" fill="#1565c0" opacity="0.7"/>
+        <path d="M18 78 Q28 74 38 78 Q48 82 58 78 Q68 74 78 78 Q88 82 88 82 L88 88 Q78 84 68 88 Q58 92 48 88 Q38 84 28 88 Q18 92 12 88 Z" fill="#1565c0" opacity="0.6"/>
+        <path d="M14 90 Q24 86 34 90 Q44 94 54 90 Q64 86 74 90 Q82 93 88 91 L88 96 Q78 98 68 95 Q58 91 48 95 Q38 99 28 95 Q18 91 12 94 Z" fill="#0d3b6e" opacity="0.8"/>
+        <text x="50" y="110" text-anchor="middle" font-size="5" fill="#c9a84c" font-family="serif" letter-spacing="1">BS. AS.</text>
+      </svg>
+    </div>
+    <div class="game-title">El Bonaerense</div>
+    <div class="game-subtitle">Adiviná el municipio del día</div>
+    <div class="date-badge" id="date-display"></div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="nav-btn active" onclick="showPanel('juego',this)">Jugar</button>
+    <button class="nav-btn" onclick="showPanel('stats',this)">Estadísticas</button>
+    <button class="nav-btn" onclick="showPanel('como',this)">¿Cómo jugar?</button>
+  </nav>
+
+  <!-- JUEGO -->
+  <div class="panel active" id="panel-juego">
+
+    <div id="reveal-screen" class="reveal-screen">
+      <p>El cronómetro arranca cuando revelás los guiones.<br>Tenés <b style="color:var(--white)">3 minutos</b> y <b style="color:var(--white)">5 intentos</b> para adivinar el municipio del día.</p>
+      <button class="reveal-btn" onclick="revelarJuego()">▶ REVELAR</button>
+    </div>
+
+    <div id="game-content" style="display:none;">
+      <div class="game-timer">
+        <div class="timer-label">Tiempo restante</div>
+        <div class="game-timer-display" id="game-timer-display">03:00</div>
+      </div>
+
+      <div class="attempt-counter">
+        <div class="label-sm">Intentos</div>
+        <div class="attempt-dots" id="attempt-dots"></div>
+      </div>
+
+      <div class="letters-display" id="letters-display"></div>
+      <div class="hints-area" id="hints-area"></div>
+      <div class="feedback-msg" id="feedback-msg"></div>
+
+      <div class="guess-area" id="guess-area">
+        <div class="autocomplete-wrap">
+          <input type="text" class="guess-input" id="guess-input"
+            placeholder="Escribí un municipio..." autocomplete="off" />
+          <div class="autocomplete-list" id="autocomplete-list"></div>
+        </div>
+        <button class="skip-btn" id="skip-btn" onclick="skipTurn()">Paso</button>
+        <button class="guess-btn" id="guess-btn" onclick="makeGuess()">Arriesgar</button>
+      </div>
+
+      <div class="result-overlay" id="result-overlay">
+        <div class="result-emoji" id="result-emoji"></div>
+        <div class="result-title" id="result-title"></div>
+        <div class="result-sub" id="result-sub-text"></div>
+        <div class="result-answer" id="result-answer"></div>
+        <button class="share-btn" onclick="shareResult()">📋 Compartir resultado</button>
+        <div class="countdown-wrap">
+          <span>Próximo municipio en</span>
+          <span id="countdown-timer">--:--:--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="panel" id="panel-stats">
+    <div class="stats-grid-4">
+      <div class="stat-card"><span class="stat-num" id="stat-played">0</span><span class="stat-label">Jugadas</span></div>
+      <div class="stat-card"><span class="stat-num" id="stat-won">0</span><span class="stat-label">Ganadas</span></div>
+      <div class="stat-card"><span class="stat-num" id="stat-lost">0</span><span class="stat-label">Perdidas</span></div>
+      <div class="stat-card"><span class="stat-num gold" id="stat-pct">—</span><span class="stat-label">% Victorias</span></div>
+    </div>
+    <div class="streak-bar">
+      <div class="streak-title">Distribución de resultados</div>
+      <div id="dist-bars"></div>
+    </div>
+    <div class="streak-bar">
+      <div style="display:flex;gap:30px;">
+        <div><span class="stat-num" id="stat-streak" style="font-size:2rem">0</span><span class="stat-label" style="display:block">Racha actual</span></div>
+        <div><span class="stat-num" id="stat-best" style="font-size:2rem">0</span><span class="stat-label" style="display:block">Mejor racha</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CÓMO JUGAR -->
+  <div class="panel" id="panel-como">
+    <div class="how-card">
+      <div class="how-step"><div class="step-num">1</div><div>Cada día hay un <b>municipio de la Provincia de Buenos Aires</b> para adivinar. Cambia a medianoche.</div></div>
+      <div class="how-step"><div class="step-num">2</div><div>Presioná <b>REVELAR</b> para ver los guiones y arrancar el cronómetro de <b>3 minutos</b>.</div></div>
+      <div class="how-step"><div class="step-num">3</div><div>Tenés <b>5 intentos</b>. Escribí el nombre — el campo tiene autocompletado. Aparecen hasta <b>3 sugerencias</b>.</div></div>
+      <div class="how-step"><div class="step-num">4</div><div>Podés presionar <b>Paso</b> para saltear un turno y ver la siguiente pista, sin perder tiempo.</div></div>
+      <div class="how-step"><div class="step-num">5</div><div>Con cada error o paso se revela una pista: <b>letra al azar → región → dato curioso → otra letra al azar</b>.</div></div>
+    </div>
+    <div class="how-card" style="font-size:0.75rem;color:var(--grey);line-height:1.8;">
+      El juego incluye los <b style="color:var(--white)">135 municipios</b> de la Provincia de Buenos Aires.
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p>Supported and developed by <a href="https://keep-ds.com/" target="_blank" rel="noopener">Keep</a></p>
+</footer>
+
+<script>
+// ─── DATOS ───────────────────────────────────────────────────────────────────
+const MDATA = {
+  "Adolfo Alsina":           { region:"Sur / Bahiense",  curioso:"Su cabecera, Carhué, está junto a la laguna Epecuén, famosa por inundarse en 1985 y quedar sumergida durante décadas." },
+  "Adolfo Gonzales Chaves":  { region:"Sur / Bahiense",  curioso:"Es uno de los municipios más jóvenes de la provincia, fundado recién en 1907." },
+  "Alberti":                 { region:"Pampas / Oeste",  curioso:"El partido es conocido por su producción agrícola de soja y girasol." },
+  "Almirante Brown":         { region:"Conurbano",        curioso:"Es uno de los partidos más poblados del conurbano con más de 550.000 habitantes en apenas 129 km²." },
+  "Arrecifes":               { region:"Norte / Litoral", curioso:"Fue uno de los primeros partidos creados en la provincia. Su nombre viene en plural." },
+  "Ayacucho":                { region:"Centro",           curioso:"Su nombre recuerda la batalla de ...... de 1824, que selló la independencia sudamericana." },
+  "Azul":                    { region:"Centro",           curioso:"Es conocida como la 'Ciudad Cervantina' de Argentina por su profunda vinculación cultural con la obra de Cervantes." },
+  "Bahía Blanca":            { region:"Sur / Bahiense",  curioso:"Es el principal puerto del sur argentino y alberga el mayor complejo petroquímico del país." },
+  "Balcarce":                { region:"Costa Atlántica", curioso:"Es la cuna del automovilismo argentino: nació allí Juan Manuel Fangio, quíntuple campeón mundial de Fórmula 1." },
+  "Baradero":                { region:"Norte / Litoral", curioso:"Es uno de los municipios más antiguos de la provincia, fundado en 1615 como reducción de indios." },
+  "Benito Juárez":           { region:"Sur / Bahiense",  curioso:"El partido lleva el nombre del expresidente mexicano. Su cabecera es famosa por el Festival Nacional del Trigo." },
+  "Berazategui":             { region:"Conurbano",        curioso:"Alberga el mayor complejo cristalero de Sudamérica, la fábrica Rigolleau, fundada en 1906." },
+  "Berisso":                 { region:"Conurbano",        curioso:"Una banda de Rock Nacional lleva su nombre mal escrito." },
+  "Bolívar":                 { region:"Pampas / Oeste",  curioso:"Lleva el nombre del Libertador del norte de América del Sur." },
+  "Bragado":                 { region:"Pampas / Oeste",  curioso:"Es conocida por el 'Caso .....', uno de los juicios más polémicos de la historia argentina del siglo XX." },
+  "Brandsen":                { region:"Conurbano",        curioso:"Alberga el circuito de automovilismo más importante de la provincia: el autódromo de La Plata está en su territorio." },
+  "Campana":                 { region:"Norte / Litoral", curioso:"Concentra una de las mayores densidades industriales del país, con plantas petroquímicas y siderúrgicas sobre el Paraná." },
+  "Cañuelas":                { region:"Conurbano",        curioso:"Donde se firmó en 1820 el Tratado de ......, pacto clave en las guerras civiles argentinas." },
+  "Capitán Sarmiento":       { region:"Norte / Litoral", curioso:"Es uno de los municipios más pequeños de la provincia. Su economía gira en torno a la producción láctea." },
+  "Carlos Casares":          { region:"Pampas / Oeste",  curioso:"Es cuna del escritor Manuel Puig, autor de 'El beso de la mujer araña'." },
+  "Carlos Tejedor":          { region:"Pampas / Oeste",  curioso:"Lleva el nombre del jurista redactor del primer Código Penal argentino." },
+  "Carmen de Areco":         { region:"Norte / Litoral", curioso:"Es uno de los partidos con mayor tradición gaucha de la provincia, con festivales de doma y folclore anuales." },
+  "Castelli":                { region:"Costa Atlántica", curioso:"El municipio forma parte de la Depresión del Salado, la zona de esteros y bañados más extensa de la pampa." },
+  "Chacabuco":               { region:"Pampas / Oeste",  curioso:"Su nombre recuerda la batalla de ......... de 1817. La ciudad cabecera tiene uno de los parques más grandes de la provincia." },
+  "Chascomús":               { region:"Centro",           curioso:"La laguna de ....... es la más visitada de la provincia y cuna del pejerrey, el pez símbolo de Buenos Aires." },
+  "Chivilcoy":               { region:"Pampas / Oeste",  curioso:"Fue el primer municipio rural de Argentina en tener alumbrado eléctrico, a fines del siglo XIX." },
+  "Colón":                   { region:"Norte / Litoral", curioso:"El partido de ..... tiene una de las densidades de tambos por km² más altas de la provincia." },
+  "Coronel de Marina Leonardo Rosales": { region:"Sur / Bahiense", curioso:"Alberga la Base Naval Puerto Belgrano, la base naval más grande de Argentina y una de las más grandes de Sudamérica." },
+  "Coronel Dorrego":         { region:"Sur / Bahiense",  curioso:"Su costa sobre el Atlántico alberga playas prácticamente vírgenes, alternativa menos masiva que otros destinos bonaerenses." },
+  "Coronel Pringles":        { region:"Sur / Bahiense",  curioso:"Es conocido por el Festival de la Estaca, una celebración tradicional del campo bonaerense." },
+  "Coronel Suárez":          { region:"Sur / Bahiense",  curioso:"Tiene una fuerte comunidad de origen danés que conserva hasta hoy tradiciones, gastronomía y arquitectura nórdica." },
+  "Daireaux":                { region:"Pampas / Oeste",  curioso:"Es uno de los principales productores de girasol de la provincia, cultivo que domina su paisaje en primavera." },
+  "Dolores":                 { region:"Costa Atlántica", curioso:"Fue la primera ciudad fundada en la pampa argentina, en 1818, durante el gobierno de Juan Martín de Pueyrredón." },
+  "Ensenada":                { region:"Conurbano",        curioso:"Alberga la destilería de YPF más antigua del país, inaugurada en 1925, que aún opera hoy." },
+  "Escobar":                 { region:"Conurbano",        curioso:"Es la capital nacional de la flor: su Fiesta Nacional de la Flor atrae cientos de miles de visitantes cada año." },
+  "Esteban Echeverría":      { region:"Conurbano",        curioso:"Lleva el nombre del poeta romántico argentino autor del 'Matadero'. El partido alberga el barrio Monte Grande." },
+  "Exaltación de la Cruz":   { region:"Norte / Litoral", curioso:"Su nombre es uno de los más singulares de la provincia y proviene de una capilla colonial del siglo XVIII." },
+  "Ezeiza":                  { region:"Conurbano",        curioso:"El partido es famoso por el aeropuerto internacional Ministro Pistarini, el más importante de Argentina." },
+  "Florencio Varela":        { region:"Conurbano",        curioso:"Alberga el Hospital El Cruce, uno de los hospitales públicos de alta complejidad más modernos de Latinoamérica." },
+  "Florentino Ameghino":     { region:"Pampas / Oeste",  curioso:"Lleva el nombre del paleontólogo argentino más célebre. En el partido se hallaron numerosos fósiles pampeanos." },
+  "General Alvarado":        { region:"Costa Atlántica", curioso:"Miramar, su ciudad cabecera, es conocida como 'la ciudad de los pinos' por el bosque costero que bordea sus playas." },
+  "General Alvear":          { region:"Centro",           curioso:"El partido es uno de los mayores productores de papa de la provincia, cultivo que domina su economía." },
+  "General Arenales":        { region:"Pampas / Oeste",  curioso:"Su economía gira en torno a la producción de maíz y soja, con una de las mayores tasas de siembra directa del país." },
+  "General Belgrano":        { region:"Centro",           curioso:"Su laguna es un destino turístico regional conocido por la pesca del pejerrey y la navegación a vela." },
+  "General Guido":           { region:"Costa Atlántica", curioso:"Es uno de los municipios menos poblados de la provincia, con menos de 3.000 habitantes en más de 4.000 km²." },
+  "General Juan Madariaga":  { region:"Costa Atlántica", curioso:"Es la puerta de entrada a la costa atlántica sur. Famoso por su Festival Nacional de la Jineteada y el Folclore." },
+  "General La Madrid":       { region:"Sur / Bahiense",  curioso:"El partido lleva el nombre de un militar héroe de las guerras de independencia." },
+  "General Las Heras":       { region:"Conurbano",        curioso:"En ....... se producen muchos de los ladrillos que abastecen la construcción del Gran Buenos Aires." },
+  "General Lavalle":         { region:"Costa Atlántica", curioso:"Alberga la mayor parte del Parque Provincial Punta Rasa, reserva natural donde anidan miles de aves migratorias." },
+  "General Paz":             { region:"Centro",           curioso:"El municipio lleva el nombre de uno de los militares más destacados de las guerras civiles." },
+  "General Pueyrredón":      { region:"Costa Atlántica", curioso:"Su ciudad cabecera, Mar del Plata, es el principal destino turístico de Argentina." },
+  "General Rodríguez":       { region:"Conurbano",        curioso:"Es uno de los municipios del conurbano con mayor crecimiento poblacional en las últimas dos décadas." },
+  "General San Martín":      { region:"Conurbano",        curioso:"Con más de 430.000 habitantes en 56 km², es uno de los partidos más densamente poblados de Argentina." },
+  "General Viamonte":        { region:"Pampas / Oeste",  curioso:"Los Toldos, su ciudad cabecera, es el lugar de nacimiento de Eva Perón, ocurrido el 7 de mayo de 1919." },
+  "General Villegas":        { region:"Pampas / Oeste",  curioso:"Es el tercer partido más grande de la provincia en superficie, con más de 12.000 km² de llanura pampeana." },
+  "González Chaves":         { region:"Sur / Bahiense",  curioso:"Su principal actividad es la ganadería bovina extensiva, con estancias que datan del siglo XIX." },
+  "Guaminí":                 { region:"Pampas / Oeste",  curioso:"El partido alberga la laguna ....... y el sistema de lagunas Encadenadas del Oeste, reserva natural de aves." },
+  "Hipólito Yrigoyen":       { region:"Pampas / Oeste",  curioso:"Lleva el nombre del dos veces presidente argentino. Henderson, su cabecera, es un nodo agroindustrial regional." },
+  "Hurlingham":              { region:"Conurbano",        curioso:"El nombre proviene del ........ Club, fundado por inmigrantes irlandeses. Es uno de los partidos más pequeños del país." },
+  "Ituzaingó":               { region:"Conurbano",        curioso:"Su nombre recuerda una batalla de 1827, durante la guerra con el Imperio de Brasil." },
+  "José Clemente Paz":             { region:"Conurbano",        curioso:"Es uno de los municipios con mayor densidad poblacional de la provincia, con más de 250.000 habitantes en 50 km²." },
+  "Junín":                   { region:"Pampas / Oeste",  curioso:"Alberga la laguna de Gómez, un importante humedal para aves migratorias y sitio de pesca deportiva." },
+  "La Costa":                { region:"Costa Atlántica", curioso:"Agrupa varias localidades balnearias como San Clemente, Santa Teresita y Mar de Ajó en un solo municipio costero." },
+  "La Matanza":              { region:"Conurbano",        curioso:"Con más de 1,7 millones de habitantes, es el partido más poblado de Argentina fuera de la Ciudad de Buenos Aires." },
+  "La Plata":                { region:"Conurbano",        curioso:"Fue la primera ciudad planificada de Argentina, fundada en 1882 con un diseño en cuadrícula con diagonales." },
+  "Lanús":                   { region:"Conurbano",        curioso:"Tiene una de las densidades poblacionales más altas de Argentina: más de 460.000 personas en 48 km²." },
+  "Laprida":                 { region:"Centro",           curioso:"Lleva el nombre del presidente del Congreso que declaró la independencia en 1816." },
+  "Las Flores":              { region:"Centro",           curioso:"Es conocida por su producción de girasol y por albergar uno de los mejores equipos de polo amateur del interior." },
+  "Leandro Niceforo Alem":         { region:"Norte / Litoral", curioso:"Lleva el nombre del político radical. Vedia, su cabecera, es un importante nodo comercial del noroeste bonaerense." },
+  "Lincoln":                 { region:"Pampas / Oeste",  curioso:"Es conocida como la 'Capital Provincial del Deporte Rural' por sus tradiciones de jineteada y pato." },
+  "Lobería":                 { region:"Sur / Bahiense",  curioso:"Su nombre hace referencia a las colonias de lobos marinos que alguna vez poblaron su costa atlántica." },
+  "Lobos":                   { region:"Conurbano",        curioso:"Es el lugar de nacimiento de Juan Domingo Perón." },
+  "Lomas de Zamora":         { region:"Conurbano",        curioso:"Alberga la Universidad Nacional de ........, una de las más grandes del conurbano bonaerense." },
+  "Luján":                   { region:"Conurbano",        curioso:"Es la capital espiritual de Argentina: su basílica recibe más de un millón de peregrinos cada año." },
+  "Magdalena":               { region:"Conurbano",        curioso:"Es uno de los municipios más antiguos de la provincia, con estancias que datan de la época colonial." },
+  "Maipú":                   { region:"Centro",           curioso:"Su nombre recuerda una batalla de 1818, victoria decisiva de San Martín en la independencia chilena." },
+  "Malvinas Argentinas":     { region:"Conurbano",        curioso:"Es uno de los municipios más jóvenes de la provincia: fue creado recién en 1994 al dividirse José C. Paz." },
+  "Mar Chiquita":            { region:"Costa Atlántica", curioso:"Alberga la albufera ......, la única albufera de Argentina y reserva de la biósfera de la UNESCO." },
+  "Marcos Paz":              { region:"Conurbano",        curioso:"Alberga el Instituto Penal Federal, uno de los establecimientos de máxima seguridad del país." },
+  "Mercedes":                { region:"Norte / Litoral", curioso:"Es la capital del gaucho bonaerense y sede de la Feria y Fiesta Provincial del Gaucho cada año." },
+  "Merlo":                   { region:"Conurbano",        curioso:"Con más de 700.000 habitantes, es uno de los partidos más poblados del conurbano bonaerense." },
+  "Monte":                   { region:"Centro",           curioso:"Alberga la laguna ......, famosa por su pesca y sus clubes náuticos familiares." },
+  "Monte Hermoso":           { region:"Sur / Bahiense",  curioso:"Tiene la particularidad de ser el único balneario de la provincia donde el sol se pone sobre el mar." },
+  "Moreno":                  { region:"Conurbano",        curioso:"Tiene la sede del CONICET más grande del conurbano y tiene una fuerte tradición en investigación tecnológica." },
+  "Morón":                   { region:"Conurbano",        curioso:"En ...... funcionó durante la dictadura uno de los centros clandestinos más activos de la provincia, el Palomar." },
+  "Navarro":                 { region:"Centro",           curioso:"La laguna de ...... es un destino de pesca y turismo rural muy visitado por habitantes del conurbano." },
+  "Necochea":                { region:"Costa Atlántica", curioso:"Tiene la playa continua más larga de Argentina, con más de 80 km de costa atlántica sin interrupciones." },
+  "Nueve de Julio":          { region:"Pampas / Oeste",  curioso:"Su nombre recuerda una fecha patria." },
+  "Olavarría":               { region:"Centro",           curioso:"Produce más del 40% del cemento de Argentina, gracias a sus enormes yacimientos de piedra caliza." },
+  "Patagones":               { region:"Sur / Bahiense",  curioso:"Es el municipio más austral y más extenso de la provincia, con 13.600 km²." },
+  "Pehuajó":                 { region:"Pampas / Oeste",  curioso:"Es uno de los mayores productores de soja del país. Su nombre significa 'lugar de espinillos' en mapuche." },
+  "Pellegrini":              { region:"Pampas / Oeste",  curioso:"Lleva el nombre de un expresidente. Es un partido ganadero con fuerte tradición estanciera." },
+  "Pergamino":               { region:"Norte / Litoral", curioso:"Es conocida como la 'Capital Nacional del Maíz' por su histórica producción de este cereal." },
+  "Pila":                    { region:"Costa Atlántica", curioso:"Es uno de los municipios menos poblados de la provincia, con apenas unos pocos miles de habitantes en casi 5.000 km²." },
+  "Pilar":                   { region:"Conurbano",        curioso:"Es el municipio con mayor cantidad de countries y barrios privados de Argentina, con más de 300 urbanizaciones cerradas." },
+  "Pinamar":                 { region:"Costa Atlántica", curioso:"Fue diseñada íntegramente por el arquitecto Jorge Bunge en la década de 1940, sobre médanos que plantaron pinos." },
+  "Presidente Perón":        { region:"Conurbano",        curioso:"Es uno de los municipios más nuevos de la provincia, creado en 1994 al dividirse Florencio Varela." },
+  "Puán":                    { region:"Sur / Bahiense",  curioso:"El municipio tiene fuertes vínculos con comunidades de inmigrantes españoles e italianos asentados desde el siglo XIX." },
+  "Punta Indio":             { region:"Conurbano",        curioso:"Alberga la Reserva de Biósfera Parque Costero del Sur, protegida por la UNESCO por su biodiversidad ribereña." },
+  "Quilmes":                 { region:"Conurbano",        curioso:"La perla del Conurbano. Se brinda con birra 🍻." },
+  "Ramallo":                 { region:"Norte / Litoral", curioso:"Alberga una de las plantas de Toyota más productivas de Sudamérica, inaugurada en 1997." },
+  "Rauch":                   { region:"Centro",           curioso:"Es conocida por sus haras y la cría de caballos de polo, una tradición que atrae compradores de todo el mundo." },
+  "Rivadavia":               { region:"Pampas / Oeste",  curioso:"Gonzales Chaves, su cabecera, es un importante nodo de la producción de cebada maltera del oeste bonaerense." },
+  "Rojas":                   { region:"Norte / Litoral", curioso:"Es considerada la capital nacional del girasol. Su laguna es uno de los principales humedales del norte bonaerense." },
+  "Roque Pérez":             { region:"Centro",           curioso:"Es famosa por sus carnavales, uno de los festivales más tradicionales del interior bonaerense." },
+  "Saavedra":                { region:"Sur / Bahiense",  curioso:"Pigüé, su ciudad cabecera, fue fundada en 1884 por inmigrantes de Aveyron, Francia, que conservan su herencia cultural." },
+  "Saladillo":               { region:"Centro",           curioso:"El municipio tiene una laguna homónima muy visitada para pesca deportiva y deportes náuticos." },
+  "Salliqueló":              { region:"Pampas / Oeste",  curioso:"Es uno de los municipios más pequeños del oeste bonaerense. Su economía se basa en la producción triguera." },
+  "Salto":                   { region:"Norte / Litoral", curioso:"Conserva una de las ciudades más antiguas del norte bonaerense, con una historia que data del período colonial." },
+  "San Andrés de Giles":     { region:"Norte / Litoral", curioso:"Es una zona de estancias históricas. Carmen de Areco, dentro del partido, conserva arquitectura rural del siglo XIX." },
+  "San Antonio de Areco":    { region:"Norte / Litoral", curioso:"Es la capital nacional del gaucho y la tradición criolla, hogar del Museo Gauchesco Ricardo Güiraldes." },
+  "San Cayetano":            { region:"Sur / Bahiense",  curioso:"El municipio tiene una intensa devoción religiosa al santo patrono del pan y del trabajo." },
+  "San Fernando":            { region:"Conurbano",        curioso:"Incluye las Islas del Delta del Paraná, un ecosistema único de humedales en el corazón del conurbano." },
+  "San Isidro":              { region:"Conurbano",        curioso:"Alberga el hipódromo más antiguo de Argentina, inaugurado en 1935." },
+  "San Miguel":              { region:"Conurbano",        curioso:"Tiene la mayor concentración de escuelas técnicas del noroeste del conurbano bonaerense." },
+  "San Nicolás":             { region:"Norte / Litoral", curioso:"Alberga SOMISA, la mayor planta siderúrgica de Argentina. También es sede de las apariciones marianas más famosas del país." },
+  "San Pedro":               { region:"Norte / Litoral", curioso:"Es la capital nacional del mimbre y la capital provincial del tomate, con grandes producciones hortícolas." },
+  "San Vicente":             { region:"Conurbano",        curioso:"Fue el lugar de descanso predilecto de Juan Manuel de Rosas: allí está la histórica Estancia Los Cerrillos." },
+  "Suipacha":                { region:"Norte / Litoral", curioso:"Su nombre recuerda una batalla de 1810, primera victoria de las fuerzas patriotas en la Revolución de Mayo." },
+  "Tandil":                  { region:"Centro",           curioso:"Es famosa por su salame y su queso, y por la Piedra Movediza, un monolito que oscilaba hasta caer en 1912." },
+  "Tapalqué":                { region:"Centro",           curioso:"Conserva uno de los fuertes de frontera mejor preservados de la provincia, del período de las guerras contra el indio." },
+  "Tigre":                   { region:"Conurbano",        curioso:"Conserva el humedal más grande de la Argentina pampeana, con cientos de islas y miles de km de ríos." },
+  "Tordillo":                { region:"Costa Atlántica", curioso:"Es el municipio menos poblado de la provincia, con apenas unos 2.000 habitantes en más de 1.300 km²." },
+  "Tornquist":               { region:"Sur / Bahiense",  curioso:"Alberga el Parque Provincial Ernesto Tornquist y el cerro Tres Picos, el punto más alto de la provincia con 1.239 metros." },
+  "Trenque Lauquen":         { region:"Pampas / Oeste",  curioso:"Su nombre significa 'laguna redonda' en mapuche. Es un importante nodo del agronegocio del oeste bonaerense." },
+  "Tres Arroyos":            { region:"Sur / Bahiense",  curioso:"Claromecó, en el partido de ......., es una de las playas más tranquilas y naturales del litoral atlántico." },
+  "Tres de Febrero":         { region:"Conurbano",        curioso:"Alberga al Parque de la Ciudad, el parque urbano más grande del conurbano bonaerense." },
+  "Tres Lomas":              { region:"Pampas / Oeste",  curioso:"Es un municipio agrícola-ganadero donde el trigo y el girasol son los cultivos predominantes del paisaje." },
+  "Vicente López":           { region:"Conurbano",        curioso:"Es el municipio con mayor ingreso per cápita de la provincia de Buenos Aires." },
+  "Villa Gesell":            { region:"Costa Atlántica", curioso:"Fue fundada y diseñada por Carlos Idaho Gesell, quien plantó pinos en los médanos costeros desde la década de 1930." },
+  "Villarino":               { region:"Sur / Bahiense",  curioso:"Es el partido más grande de la provincia por superficie, con 14.136 km². Incluye el balneario de Pehuén-Có." },
+  "Zárate":                  { region:"Norte / Litoral", curioso:"Alberga el complejo de puentes más largo de Argentina sobre el río Paraná, inaugurado en 1978." }
+};
+
+const MUNICIPIOS_BASE = Object.keys(MDATA);
+
+// ─── ORDEN ALEATORIO DIARIO ───────────────────────────────────────────────────
+// Usamos una semilla basada en la fecha para que el orden sea diferente cada día
+// pero consistente para todos los jugadores del mismo día.
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    const j = Math.abs(s) % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getDailySeed() {
+  const d = new Date();
+  // Semilla única por día: año * 10000 + mes * 100 + día
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+
+// Lista barajada para hoy
+const MUNICIPIOS = seededShuffle(MUNICIPIOS_BASE, getDailySeed());
+
+function getDayIndex() {
+  const start = new Date('2024-01-01T00:00:00');
+  const diff = Math.floor((new Date() - start) / 86400000);
+  return diff % MUNICIPIOS.length;
+}
+
+function getTodayKey() {
+  const d = new Date();
+  return `elbona_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+}
+
+// ─── LETRAS AL AZAR ───────────────────────────────────────────────────────────
+function buildEligibleIndices(municipio) {
+  const eligible = [];
+  let gi = 0;
+  for (const word of municipio.split(' ')) {
+    for (let c = 0; c < word.length; c++) {
+      if (c !== 0) eligible.push(gi + c);
+    }
+    gi += word.length + 1;
+  }
+  return eligible;
+}
+
+function pickLetterIndices(municipio) {
+  const eligible = buildEligibleIndices(municipio);
+  if (eligible.length === 0) return [null, null];
+  const seed = getDailySeed();
+  const i1 = eligible[seed % eligible.length];
+  const remaining = eligible.filter(i => i !== i1);
+  if (remaining.length === 0) return [i1, null];
+  const i2 = remaining[(seed * 7 + 3) % remaining.length];
+  return [i1, i2];
+}
+
+// ─── ESTADO ──────────────────────────────────────────────────────────────────
+let G = {
+  municipio: '', attempts: 0, maxAttempts: 5,
+  guesses: [], won: false, lost: false,
+  hintsUnlocked: 0, revealedIdx: [], revealed: false
+};
+
+function loadToday() {
+  const s = localStorage.getItem(getTodayKey());
+  return s ? JSON.parse(s) : null;
+}
+function saveToday() { localStorage.setItem(getTodayKey(), JSON.stringify(G)); }
+function loadStats() {
+  const s = localStorage.getItem('elbona_stats');
+  return s ? JSON.parse(s) : { played:0, won:0, lost:0, streak:0, best:0, dist:{1:0,2:0,3:0,4:0,5:0,X:0} };
+}
+function saveStats(s) { localStorage.setItem('elbona_stats', JSON.stringify(s)); }
+
+// ─── TIMER ────────────────────────────────────────────────────────────────────
+let timerInterval = null;
+
+function startGameTimer() {
+  const TOTAL = 3 * 60;
+  let remaining = TOTAL;
+  const display = document.getElementById('game-timer-display');
+
+  timerInterval = setInterval(() => {
+    remaining--;
+    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const s = String(remaining % 60).padStart(2, '0');
+    display.textContent = `${m}:${s}`;
+    display.className = 'game-timer-display';
+    if (remaining <= 30)      display.classList.add('danger');
+    else if (remaining <= 60) display.classList.add('warning');
+
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      if (!G.won && !G.lost) {
+        G.lost = true;
+        document.getElementById('feedback-msg').textContent = '⏰ ¡Se acabó el tiempo!';
+        document.getElementById('feedback-msg').className = 'feedback-msg wrong';
+        recordResult(false, 'X');
+        saveToday();
+        renderAll();
+      }
+    }
+  }, 1000);
+}
+
+function stopTimer() { if (timerInterval) clearInterval(timerInterval); }
+
+// ─── REVELAR ──────────────────────────────────────────────────────────────────
+function revelarJuego() {
+  G.revealed = true;
+  saveToday();
+  document.getElementById('reveal-screen').style.display = 'none';
+  document.getElementById('game-content').style.display = 'block';
+  renderAll();
+  startGameTimer();
+}
+
+// ─── PASO (skip) ──────────────────────────────────────────────────────────────
+function skipTurn() {
+  if (G.won || G.lost) return;
+  if (G.hintsUnlocked >= 4) return; // ya no hay más pistas
+
+  G.guesses.push({ name: null, correct: false, skipped: true });
+  G.attempts++;
+  G.hintsUnlocked = Math.min(G.hintsUnlocked + 1, 4);
+
+  const fb = document.getElementById('feedback-msg');
+
+  if (G.attempts >= G.maxAttempts) {
+    G.lost = true;
+    fb.textContent = '¡Sin intentos!';
+    fb.className = 'feedback-msg wrong';
+    recordResult(false, 'X');
+  } else {
+    const r = G.maxAttempts - G.attempts;
+    fb.textContent = `Paso — nueva pista desbloqueada. Te quedan ${r} intento${r!==1?'s':''}.`;
+    fb.className = 'feedback-msg skipped';
+  }
+
+  saveToday();
+  renderAll();
+
+  // Deshabilitar "Paso" si ya no quedan pistas nuevas
+  const skipBtn = document.getElementById('skip-btn');
+  if (G.hintsUnlocked >= 4 || G.attempts >= G.maxAttempts) {
+    skipBtn.disabled = true;
+  }
+}
+
+// ─── PISTAS ──────────────────────────────────────────────────────────────────
+function getWordCount(municipio) {
+  const words = municipio.split(' ').length;
+  if (words === 1) return null;
+  return `${words} palabras`;
+}
+
+function getHints() {
+  const m = G.municipio;
+  const d = MDATA[m];
+  const letterCount = m.replace(/ /g,'').length;
+  const wordCount = getWordCount(m);
+  const [idx1, idx2] = pickLetterIndices(m);
+  return [
+    { icon:'#',  label:'Cantidad de letras', value: letterCount + ' letras' + (wordCount ? ` · ${wordCount}` : ''), letterIdx: null },
+    { icon:'🔤', label:'Letra al azar',       value: idx1!==null ? m[idx1].toUpperCase() : '?', letterIdx: idx1 },
+    { icon:'📍', label:'Región',              value: d.region, letterIdx: null },
+    { icon:'💡', label:'Dato curioso',        value: d.curioso, letterIdx: null },
+    { icon:'🔡', label:'Otra letra al azar',  value: idx2!==null ? m[idx2].toUpperCase() : '?', letterIdx: idx2 },
+  ];
+}
+
+// ─── RENDER LETRAS ────────────────────────────────────────────────────────────
+function renderLetters() {
+  const m = G.municipio;
+  const el = document.getElementById('letters-display');
+  el.innerHTML = '';
+  const end = G.won || G.lost;
+  for (let i = 0; i < m.length; i++) {
+    const ch = m[i];
+    const box = document.createElement('div');
+    if (ch === ' ') {
+      box.className = 'letter-box space';
+    } else {
+      box.className = 'letter-box';
+      if (end) {
+        box.textContent = ch.toUpperCase();
+        box.classList.add(G.won ? 'win-revealed' : 'lose-revealed');
+      } else if (G.revealedIdx.includes(i)) {
+        box.textContent = ch.toUpperCase();
+        box.classList.add('hint-revealed');
+      }
+    }
+    el.appendChild(box);
+  }
+}
+
+// ─── RENDER PISTAS ────────────────────────────────────────────────────────────
+function renderHints() {
+  const hints = getHints();
+  const el = document.getElementById('hints-area');
+  el.innerHTML = '<div class="label-sm" style="margin-bottom:10px">Pistas</div>';
+  hints.forEach((h, i) => {
+    const visible = i <= G.hintsUnlocked;
+    const div = document.createElement('div');
+    div.className = 'hint-item' + (visible ? ' visible' : '');
+    div.innerHTML = `
+      <div class="hint-icon">${h.icon}</div>
+      <div style="flex:1">
+        <div class="hint-label">${h.label}</div>
+        <div class="hint-value" style="${i===3?'font-size:0.75rem;font-weight:400;line-height:1.5':''}">
+          ${visible ? h.value : '???'}
+        </div>
+      </div>`;
+    el.appendChild(div);
+  });
+  let changed = false;
+  hints.forEach((h, i) => {
+    if (i <= G.hintsUnlocked && h.letterIdx !== null && !G.revealedIdx.includes(h.letterIdx)) {
+      G.revealedIdx.push(h.letterIdx);
+      changed = true;
+    }
+  });
+  if (changed) renderLetters();
+}
+
+// ─── DOTS ─────────────────────────────────────────────────────────────────────
+function renderDots() {
+  const el = document.getElementById('attempt-dots');
+  el.innerHTML = '';
+  for (let i = 0; i < G.maxAttempts; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    if (i < G.guesses.length) {
+      const g = G.guesses[i];
+      if (g.skipped)       d.classList.add('skipped');
+      else if (g.correct)  d.classList.add('right');
+      else                 d.classList.add('wrong');
+    }
+    el.appendChild(d);
+  }
+}
+
+// ─── AUTOCOMPLETE (máx 3) ─────────────────────────────────────────────────────
+let acSelectedIdx = -1;
+
+function initAutocomplete() {
+  const input = document.getElementById('guess-input');
+  const list  = document.getElementById('autocomplete-list');
+  const used  = () => G.guesses.filter(g => g.name).map(g => g.name);
+
+  input.addEventListener('input', () => {
+    const q = normalize(input.value.trim());
+    list.innerHTML = '';
+    acSelectedIdx = -1;
+    if (!q) { list.classList.remove('open'); return; }
+
+    const matches = MUNICIPIOS_BASE
+      .filter(m => !used().includes(m) && normalize(m).includes(q))
+      .slice(0, 3); // MÁXIMO 3 sugerencias
+
+    if (!matches.length) { list.classList.remove('open'); return; }
+
+    matches.forEach(m => {
+      const item = document.createElement('div');
+      item.className = 'autocomplete-item';
+      item.innerHTML = highlight(m, input.value.trim());
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        input.value = m;
+        list.classList.remove('open');
+      });
+      list.appendChild(item);
+    });
+    list.classList.add('open');
+  });
+
+  input.addEventListener('keydown', e => {
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      acSelectedIdx = Math.min(acSelectedIdx + 1, items.length - 1);
+      items.forEach((it, i) => it.classList.toggle('active', i === acSelectedIdx));
+      if (items[acSelectedIdx]) input.value = items[acSelectedIdx].textContent;
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      acSelectedIdx = Math.max(acSelectedIdx - 1, -1);
+      items.forEach((it, i) => it.classList.toggle('active', i === acSelectedIdx));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (acSelectedIdx >= 0 && items[acSelectedIdx]) {
+        input.value = items[acSelectedIdx].textContent;
+        list.classList.remove('open');
+      } else {
+        makeGuess();
+      }
+    } else if (e.key === 'Escape') {
+      list.classList.remove('open');
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.autocomplete-wrap')) list.classList.remove('open');
+  });
+}
+
+function normalize(str) {
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function highlight(text, query) {
+  const q = normalize(query);
+  const t = normalize(text);
+  const idx = t.indexOf(q);
+  if (idx === -1) return text;
+  return text.slice(0, idx) + '<mark>' + text.slice(idx, idx + query.length) + '</mark>' + text.slice(idx + query.length);
+}
+
+// ─── RESULTADO ────────────────────────────────────────────────────────────────
+function renderResult() {
+  const ov = document.getElementById('result-overlay');
+  if (!G.won && !G.lost) { ov.classList.remove('show'); return; }
+  ov.classList.add('show');
+  document.getElementById('guess-area').style.display = 'none';
+  stopTimer();
+  if (G.won) {
+    document.getElementById('result-emoji').textContent = '🎉';
+    document.getElementById('result-title').textContent = '¡Acertaste!';
+    document.getElementById('result-title').className = 'result-title win';
+    document.getElementById('result-sub-text').textContent = `En ${G.attempts} intento${G.attempts!==1?'s':''}`;
+    document.getElementById('result-answer').textContent = '';
+  } else {
+    document.getElementById('result-emoji').textContent = '😔';
+    document.getElementById('result-title').textContent = 'Sin suerte';
+    document.getElementById('result-title').className = 'result-title lose';
+    document.getElementById('result-sub-text').textContent = 'El municipio era:';
+    document.getElementById('result-answer').textContent = G.municipio.toUpperCase();
+  }
+  startCountdown();
+}
+
+function renderAll() {
+  renderLetters();
+  renderHints();
+  renderDots();
+  renderResult();
+  // Estado del botón Paso
+  const skipBtn = document.getElementById('skip-btn');
+  if (skipBtn) skipBtn.disabled = G.won || G.lost || G.hintsUnlocked >= 4 || G.attempts >= G.maxAttempts;
+}
+
+// ─── JUGAR ────────────────────────────────────────────────────────────────────
+function makeGuess() {
+  if (G.won || G.lost) return;
+  const input = document.getElementById('guess-input');
+  const guess = input.value.trim();
+  if (!guess) return;
+
+  const valid = MUNICIPIOS_BASE.find(m => m.toLowerCase() === guess.toLowerCase());
+  if (!valid) {
+    const fb = document.getElementById('feedback-msg');
+    fb.textContent = 'Ese nombre no está en la lista. Usá el autocompletado.';
+    fb.className = 'feedback-msg wrong';
+    return;
+  }
+
+  const correct = valid.toLowerCase() === G.municipio.toLowerCase();
+  G.guesses.push({ name: valid, correct });
+  G.attempts++;
+
+  const fb = document.getElementById('feedback-msg');
+  input.value = '';
+  document.getElementById('autocomplete-list').classList.remove('open');
+
+  if (correct) {
+    G.won = true;
+    fb.textContent = '¡Correcto!';
+    fb.className = 'feedback-msg right';
+    recordResult(true, G.attempts);
+  } else {
+    if (G.hintsUnlocked < 4) G.hintsUnlocked++;
+    if (G.attempts >= G.maxAttempts) {
+      G.lost = true;
+      fb.textContent = '¡Sin intentos!';
+      fb.className = 'feedback-msg wrong';
+      recordResult(false, 'X');
+    } else {
+      const r = G.maxAttempts - G.attempts;
+      fb.textContent = `Incorrecto — nueva pista desbloqueada. Te quedan ${r} intento${r!==1?'s':''}.`;
+      fb.className = 'feedback-msg wrong';
+    }
+  }
+  saveToday();
+  renderAll();
+}
+
+function recordResult(won, attempts) {
+  const s = loadStats();
+  s.played++;
+  if (won) {
+    s.won++; s.streak++;
+    s.best = Math.max(s.best, s.streak);
+    s.dist[attempts] = (s.dist[attempts]||0) + 1;
+  } else {
+    s.lost++; s.streak = 0;
+    s.dist['X'] = (s.dist['X']||0) + 1;
+  }
+  saveStats(s);
+  gtag('event', won ? 'game_won' : 'game_lost', {
+    municipio: G.municipio, intentos: attempts, pistas_usadas: G.hintsUnlocked
+  });
+}
+
+// ─── ESTADÍSTICAS ─────────────────────────────────────────────────────────────
+function renderStats() {
+  const s = loadStats();
+  document.getElementById('stat-played').textContent = s.played;
+  document.getElementById('stat-won').textContent    = s.won;
+  document.getElementById('stat-lost').textContent   = s.lost;
+  const pct = s.played > 0 ? Math.round((s.won/s.played)*100) : null;
+  document.getElementById('stat-pct').textContent    = pct !== null ? pct+'%' : '—';
+  document.getElementById('stat-streak').textContent = s.streak;
+  document.getElementById('stat-best').textContent   = s.best;
+  const maxV = Math.max(...[1,2,3,4,5,'X'].map(k => s.dist[k]||0), 1);
+  const el = document.getElementById('dist-bars');
+  el.innerHTML = '';
+  [1,2,3,4,5,'X'].forEach(k => {
+    const v = s.dist[k]||0;
+    const p = Math.round((v/maxV)*100);
+    el.innerHTML += `<div class="bar-row">
+      <div class="bar-label">${k==='X'?'Sin ganar':k+' intento'+(k!==1?'s':'')}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div>
+      <div class="bar-val">${v}</div>
+    </div>`;
+  });
+}
+
+// ─── COMPARTIR ────────────────────────────────────────────────────────────────
+function shareResult() {
+  const blocks = G.guesses.map(g => g.skipped ? '🟧' : g.correct ? '🟦' : '🟥');
+  while (blocks.length < G.maxAttempts) blocks.push('⬛');
+  const d = new Date();
+  const txt = `🗺️ El Bonaerense — ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}\n${blocks.join('')}\n${G.won?`✅ ${G.attempts}/${G.maxAttempts}`:`❌ ${G.maxAttempts}/${G.maxAttempts}`}\n\nDios no atenderá acá, pero yo si. ¿Querés probar si vos también?\n👉 https://elbonaerense.online`;
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.querySelector('.share-btn');
+    btn.textContent = '✅ ¡Copiado!';
+    setTimeout(() => btn.textContent = '📋 Compartir resultado', 2000);
+  });
+}
+
+// ─── COUNTDOWN ────────────────────────────────────────────────────────────────
+function startCountdown() {
+  function tick() {
+    const now = new Date(), tom = new Date(now);
+    tom.setDate(tom.getDate()+1); tom.setHours(0,0,0,0);
+    const diff = tom - now;
+    const h = String(Math.floor(diff/3600000)).padStart(2,'0');
+    const m = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    const s = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+    const el = document.getElementById('countdown-timer');
+    if (el) el.textContent = `${h}:${m}:${s}`;
+  }
+  tick(); setInterval(tick, 1000);
+}
+
+// ─── NAVEGACIÓN ───────────────────────────────────────────────────────────────
+function showPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'stats') renderStats();
+}
+
+// ─── CANVAS ───────────────────────────────────────────────────────────────────
+function initCanvas() {
+  const canvas = document.getElementById('canvas-bg');
+  const ctx = canvas.getContext('2d');
+  let W, H, pts = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function initPts() {
+    pts = [];
+    for (let i=0;i<70;i++) pts.push({ x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.5+0.3, vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3, a:Math.random()*.5+.1 });
+  }
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(33,150,243,${p.a})`; ctx.fill();
+    });
+    for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){
+        ctx.beginPath(); ctx.strokeStyle=`rgba(33,150,243,${.08*(1-dist/120)})`; ctx.lineWidth=.5;
+        ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  resize(); initPts(); draw();
+  window.addEventListener('resize', () => { resize(); initPts(); });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  const d = new Date();
+  const dias  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('date-display').textContent =
+    `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+
+  const saved = loadToday();
+  if (saved) {
+    G = saved;
+    if (!G.revealedIdx) G.revealedIdx = [];
+    if (!('revealed' in G)) G.revealed = false;
+  } else {
+    G = {
+      municipio: MUNICIPIOS[getDayIndex()],
+      attempts: 0, maxAttempts: 5,
+      guesses: [], won: false, lost: false,
+      hintsUnlocked: 0, revealedIdx: [], revealed: false
+    };
+  }
+
+  initCanvas();
+
+  if (G.revealed) {
+    document.getElementById('reveal-screen').style.display = 'none';
+    document.getElementById('game-content').style.display = 'block';
+    renderAll();
+    if (!G.won && !G.lost) startGameTimer();
+  }
+
+  initAutocomplete();
+}
+
+init();
+</script>
+</body>
+</html>
